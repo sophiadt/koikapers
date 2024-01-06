@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Raccoon.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">koi-kapers</a> &gt; <a href="index.source.html" class="el_package">com.mycompany.app</a> &gt; <span class="el_source">Raccoon.java</span></div><h1>Raccoon.java</h1><pre class="source lang-java linenums">package com.mycompany.app;
+
+import java.awt.*;
+import java.util.Random;
+
+public class Raccoon extends Entity {
+
+    Game gamePanel;
+    KeyHandler keyHandler;
+<span class="fc" id="L10">    int changeDirection = 0;</span>
+
+    /**
+     * Constructor for the raccoon.
+     * @param panel is the game panel
+     * @param k is the key handler
+     */
+<span class="fc" id="L17">    public Raccoon(Game panel, KeyHandler k) {</span>
+<span class="fc" id="L18">        this.gamePanel = panel;</span>
+<span class="fc" id="L19">        this.keyHandler = k;</span>
+        // need a way to set the x and y, probably by loading it from the board
+<span class="fc" id="L21">        this.speed = 4;</span>
+<span class="fc" id="L22">        this.hitbox = new Rectangle(8,8,this.gamePanel.hitboxSize, this.gamePanel.hitboxSize); // 1x2 cell hitbox</span>
+<span class="fc" id="L23">        super.loadImages(&quot;Raccoon&quot;);</span>
+<span class="fc" id="L24">    }</span>
+    /**
+     * Sets the location of the raccoon.
+     * @param x is the x coordinate of the raccoon
+     * @param y is the y coordinate of the raccoon
+     */
+    public void setLocation(int x, int y){
+<span class="fc" id="L31">        this.x = x * gamePanel.cellSize;</span>
+<span class="fc" id="L32">        this.y = y * gamePanel.cellSize;</span>
+<span class="fc" id="L33">    }</span>
+
+    /**
+     * Updates the raccoon's location and direction.
+     * @param playerX is the player's x coordinate
+     * @param playerY is the player's y coordinate
+     */
+    public void update(int playerX, int playerY) {
+        // player location in cells
+<span class="fc" id="L42">        int goalCol = (playerX + gamePanel.p1.hitbox.x) / gamePanel.cellSize;</span>
+<span class="fc" id="L43">        int goalRow = (playerY + gamePanel.p1.hitbox.y) / gamePanel.cellSize;</span>
+        // get the path to the player location
+<span class="fc" id="L45">        searchPath(goalCol, goalRow);</span>
+
+<span class="fc" id="L47">        colliding = false;</span>
+<span class="fc" id="L48">        gamePanel.collisionHandler.checkCollison(this);</span>
+        // if not colliding with anything move in the direction
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if (!colliding) {</span>
+<span class="pc bpc" id="L51" title="2 of 5 branches missed.">            switch (direction) {</span>
+                case &quot;up&quot;:
+<span class="nc" id="L53">                this.y -= speed;</span>
+<span class="nc" id="L54">                break;</span>
+
+                case &quot;down&quot;:
+<span class="fc" id="L57">                this.y += speed;</span>
+<span class="fc" id="L58">                break;</span>
+
+                case &quot;left&quot;:
+<span class="fc" id="L61">                this.x -= speed;</span>
+<span class="fc" id="L62">                break;</span>
+
+                case &quot;right&quot;:
+<span class="nc" id="L65">                this.x += speed;</span>
+                break;
+<span class="fc" id="L67">            }</span>
+
+<span class="fc" id="L69">            spriteCounter++;</span>
+
+<span class="fc bfc" id="L71" title="All 2 branches covered.">            if(spriteCounter &gt; 2) { // 2 FPS</span>
+                // if (spriteNum &gt; 0) {
+                //     spriteNum++;
+                // } else {
+                //     spriteNum = 1;
+                // }
+
+<span class="pc bpc" id="L78" title="2 of 3 branches missed.">                switch (spriteNum) {</span>
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+<span class="fc" id="L87">                    spriteNum++;</span>
+<span class="fc" id="L88">                    break;</span>
+
+                    case 9:
+<span class="nc" id="L91">                    spriteNum = 1;</span>
+                    break;
+                }
+<span class="fc" id="L94">                spriteCounter = 0;</span>
+            }
+        }
+<span class="fc" id="L97">    }</span>
+
+    /**
+     * Draws the raccoon from the 9 images loaded in loadRaccoonImages() based on the direction and spriteNum.
+     * @param g2d is the graphics object
+     */
+    public void draw(Graphics2D g2d) {
+<span class="fc" id="L104">        g2d.drawImage(super.draw(), this.x, this.y, gamePanel.cellSize, gamePanel.cellSize, null);</span>
+<span class="fc" id="L105">    }</span>
+
+    /**
+     * Searches for a path to the player.
+     * @param goalCol is the player's x coordinate
+     * @param goalRow is the player's y coordinate
+     */
+    public void searchPath(int goalCol, int goalRow) {
+<span class="fc" id="L113">        int startX = (this.x + this.hitbox.width) / gamePanel.cellSize;</span>
+<span class="fc" id="L114">        int startY = (this.y + this.hitbox.height) / gamePanel.cellSize;</span>
+
+<span class="fc" id="L116">        gamePanel.pathFinder.setNodes(startX, startY, goalCol, goalRow);</span>
+        // search for the path
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">        if(gamePanel.pathFinder.search()){</span>
+<span class="fc" id="L119">            int nextX = gamePanel.pathFinder.pathList.get(0).col * gamePanel.cellSize;</span>
+<span class="fc" id="L120">            int nextY = gamePanel.pathFinder.pathList.get(0).row * gamePanel.cellSize;</span>
+
+<span class="fc" id="L122">            int entityLeftX = this.x + this.hitbox.x;</span>
+<span class="fc" id="L123">            int entityRightX = this.x + this.hitbox.x + this.hitbox.width;</span>
+<span class="fc" id="L124">            int entityTopY = this.y + this.hitbox.y;</span>
+<span class="fc" id="L125">            int entityBottomY = this.y + this.hitbox.y + this.hitbox.height;</span>
+            // move in the direction of the next node
+<span class="fc bfc" id="L127" title="All 6 branches covered.">            if (entityTopY &gt; nextY &amp;&amp; entityLeftX &gt;= nextX &amp;&amp; entityRightX &lt; nextX+gamePanel.cellSize) {</span>
+<span class="fc" id="L128">                this.direction = &quot;up&quot;;</span>
+<span class="pc bpc" id="L129" title="1 of 6 branches missed.">            } else if (entityTopY &lt; nextY &amp;&amp; entityLeftX &gt;= nextX &amp;&amp; entityRightX &lt; nextX+gamePanel.cellSize) {</span>
+<span class="fc" id="L130">                this.direction = &quot;down&quot;;</span>
+<span class="pc bpc" id="L131" title="1 of 4 branches missed.">            } else if (entityTopY &gt;= nextY &amp;&amp; entityBottomY &lt; nextY + gamePanel.cellSize) {</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">                if (entityLeftX &gt; nextX){</span>
+<span class="fc" id="L133">                    this.direction = &quot;left&quot;;</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">                } else if (entityLeftX &lt; nextX){</span>
+<span class="fc" id="L135">                    this.direction = &quot;right&quot;;</span>
+                }
+<span class="pc bpc" id="L137" title="3 of 4 branches missed.">            } else if (entityTopY &gt; nextY &amp;&amp; entityLeftX &gt; nextX) {</span>
+<span class="nc" id="L138">                this.direction = &quot;up&quot;;</span>
+<span class="nc" id="L139">                this.colliding = false;</span>
+<span class="nc" id="L140">                gamePanel.collisionHandler.checkCollison(this);</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">                if (this.colliding) {</span>
+<span class="nc" id="L142">                    this.direction = &quot;left&quot;;</span>
+                }
+<span class="pc bpc" id="L144" title="3 of 4 branches missed.">            } else if (entityTopY &gt; nextY &amp;&amp; entityLeftX&lt;nextX) {</span>
+<span class="nc" id="L145">                this.direction = &quot;up&quot;;</span>
+<span class="nc" id="L146">                this.colliding = false;</span>
+<span class="nc" id="L147">                gamePanel.collisionHandler.checkCollison(this);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">                if (this.colliding) {</span>
+<span class="nc" id="L149">                    this.direction = &quot;right&quot;;</span>
+                }
+<span class="pc bpc" id="L151" title="2 of 4 branches missed.">            } else if (entityTopY &lt; nextY &amp;&amp; entityLeftX &gt; nextX) {</span>
+<span class="fc" id="L152">                this.direction = &quot;down&quot;;</span>
+<span class="fc" id="L153">                this.colliding = false;</span>
+<span class="fc" id="L154">                gamePanel.collisionHandler.checkCollison(this);</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">                if (this.colliding) {</span>
+<span class="nc" id="L156">                    this.direction = &quot;left&quot;;</span>
+                }
+<span class="nc bnc" id="L158" title="All 4 branches missed.">            } else if (entityTopY &lt; nextY &amp;&amp; entityLeftX &lt; nextX) {</span>
+<span class="nc" id="L159">                this.direction = &quot;down&quot;;</span>
+<span class="nc" id="L160">                this.colliding = false;</span>
+<span class="nc" id="L161">                gamePanel.collisionHandler.checkCollison(this);</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">                if (this.colliding) {</span>
+<span class="nc" id="L163">                    this.direction = &quot;right&quot;;</span>
+                }
+            }
+<span class="nc" id="L166">        } else {</span>
+            // if the path is not found, change direction every 60 frames
+<span class="nc bnc" id="L168" title="All 2 branches missed.">            if (this.changeDirection == 0) {</span>
+<span class="nc" id="L169">                Random rand = new Random();</span>
+<span class="nc" id="L170">                int low = 1;</span>
+<span class="nc" id="L171">                int high = 5;</span>
+<span class="nc" id="L172">                int result = rand.nextInt(high-low) + low;</span>
+<span class="nc bnc" id="L173" title="All 5 branches missed.">                switch (result) {</span>
+                    case 1:
+<span class="nc" id="L175">                        this.direction = &quot;up&quot;;</span>
+<span class="nc" id="L176">                        break;</span>
+                    case 2:
+<span class="nc" id="L178">                        this.direction = &quot;down&quot;;</span>
+<span class="nc" id="L179">                        break;</span>
+                    case 3:
+<span class="nc" id="L181">                        this.direction = &quot;left&quot;;</span>
+<span class="nc" id="L182">                        break;</span>
+                    case 4:
+<span class="nc" id="L184">                        this.direction = &quot;right&quot;;</span>
+<span class="nc" id="L185">                        break;</span>
+                    default:
+                        break;
+                }
+            }
+<span class="nc" id="L190">            this.changeDirection++;</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">            if (this.changeDirection == 60) {</span>
+<span class="nc" id="L192">                this.changeDirection = 0;</span>
+            }
+        }
+<span class="fc" id="L195">    }</span>
+
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

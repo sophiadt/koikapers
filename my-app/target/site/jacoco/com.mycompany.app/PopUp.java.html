@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PopUp.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">koi-kapers</a> &gt; <a href="index.source.html" class="el_package">com.mycompany.app</a> &gt; <span class="el_source">PopUp.java</span></div><h1>PopUp.java</h1><pre class="source lang-java linenums">package com.mycompany.app;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import static java.awt.Font.TRUETYPE_FONT;
+
+/**
+ * PopUp class for the game. Handles the pop up messages that need to be shown/drawn on screen.
+ */
+public class PopUp {
+    Game gamepanel;
+    Font titleFont, systemFont, FinkHeavy, Seurat;
+<span class="fc" id="L16">    public static int titleOption = 0;</span>
+
+    /**
+     * Constructor for the PopUp class.
+     * @param gamepanel The game panel.
+     */
+<span class="fc" id="L22">    public PopUp(Game gamepanel) {</span>
+<span class="fc" id="L23">        this.gamepanel = gamepanel;</span>
+
+        try {
+<span class="fc" id="L26">            InputStream is = getClass().getResourceAsStream(&quot;/fonts/FinkHeavy.ttf&quot;);</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">            assert is != null;</span>
+<span class="fc" id="L28">            FinkHeavy = Font.createFont(TRUETYPE_FONT, is);</span>
+
+<span class="fc" id="L30">            is = getClass().getResourceAsStream(&quot;/fonts/FOT-Seurat Pro B.otf&quot;);</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">            assert is != null;</span>
+<span class="fc" id="L32">            Seurat = Font.createFont(TRUETYPE_FONT, is);</span>
+<span class="pc" id="L33">        } catch (Exception e) {</span>
+<span class="nc" id="L34">            e.printStackTrace();</span>
+        }
+<span class="fc" id="L36">        titleFont = FinkHeavy.deriveFont(Font.BOLD, gamepanel.cellSize);</span>
+<span class="fc" id="L37">        systemFont = Seurat.deriveFont(Font.PLAIN, gamepanel.cellSize);</span>
+<span class="fc" id="L38">    }</span>
+
+    /**
+     * Draws the title messages on screen.
+     * @param g2d The graphics object.
+     */
+    public void displayTitleMessage(Graphics2D g2d, String message, int x, int y, Color color) {
+<span class="fc" id="L45">        g2d.setFont(titleFont);</span>
+<span class="fc" id="L46">        g2d.setColor(color);</span>
+<span class="fc" id="L47">        g2d.drawString(message, x, y);</span>
+<span class="fc" id="L48">    }</span>
+
+    /**
+     * Draws the pop up messages on screen.
+     * @param g2d
+     * @param message
+     * @param x
+     * @param y
+     * @param color
+     * @param specTitleOption
+     */
+    public void displaySubtitleMessage(Graphics2D g2d, String message, int x, int y, Color color, int specTitleOption) {
+        // make the subtitle 0.8 times the size of the menuFont
+<span class="fc" id="L61">        int fontSize = (int) (gamepanel.cellSize * 0.8);</span>
+<span class="fc" id="L62">        g2d.setFont(titleFont.deriveFont(Font.PLAIN, fontSize));</span>
+<span class="fc" id="L63">        g2d.setColor(color);</span>
+<span class="fc" id="L64">        g2d.drawString(message, x, y);</span>
+
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        if(titleOption == specTitleOption) {</span>
+<span class="fc" id="L67">            g2d.drawString(&quot;-&gt;&quot;, x - 40, y);</span>
+        }
+<span class="fc" id="L69">    }</span>
+
+    /**
+     * Draws messages in a specific style on screen.
+     * @param g2d
+     * @param message
+     * @param x
+     * @param y
+     * @param color
+     */
+    // displaySubtitleMessage with no specTitleOption for instruction
+    public void displaySubtitleMessage(Graphics2D g2d, String message, int x, int y, Color color) {
+        // make the subtitle 0.8 times the size of the menuFont
+<span class="fc" id="L82">        int fontSize = (int) (gamepanel.cellSize * 0.8);</span>
+<span class="fc" id="L83">        g2d.setFont(titleFont.deriveFont(Font.PLAIN, fontSize));</span>
+<span class="fc" id="L84">        g2d.setColor(color);</span>
+<span class="fc" id="L85">        g2d.drawString(message, x, y);</span>
+<span class="fc" id="L86">    }</span>
+
+    /**
+     *  Draws the system text on screen.
+     * @param g2d
+     * @param message
+     * @param x
+     * @param y
+     * @param color
+     */
+    public void displaySystemText(Graphics2D g2d, String message, int x, int y, Color color) {
+<span class="fc" id="L97">        int fontSize = (int) (gamepanel.cellSize * 0.8);</span>
+<span class="fc" id="L98">        g2d.setFont(systemFont.deriveFont(Font.PLAIN, fontSize));</span>
+<span class="fc" id="L99">        g2d.setColor(color);</span>
+<span class="fc" id="L100">        g2d.drawString(message, x, y);</span>
+<span class="fc" id="L101">    }</span>
+
+    //Below methods are for displaying rules
+    /**
+     * Draws images and rules on screen.
+     * @param g2d
+     * @param message
+     * @param x
+     * @param y
+     * @param color
+     * @param image
+     */
+    public void displaySubtitleRules(Graphics2D g2d, String message, int x, int y, Color color, BufferedImage image) {
+<span class="fc" id="L114">        g2d.drawImage(image, x - 70, y-60, 75, 75, null);</span>
+<span class="fc" id="L115">        g2d.drawString(message, x, y);</span>
+<span class="fc" id="L116">    }</span>
+
+    /**
+     * Draws the Key caps images on screen.
+     * @param g2d
+     * @param x
+     * @param y
+     * @param image
+     */
+    public void displayKeyCaps(Graphics2D g2d, int x, int y, BufferedImage image) {
+<span class="fc" id="L126">        g2d.drawImage(image, x, y, 64, 64, null);</span>
+<span class="fc" id="L127">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

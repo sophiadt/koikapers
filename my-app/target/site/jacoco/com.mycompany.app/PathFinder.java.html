@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PathFinder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">koi-kapers</a> &gt; <a href="index.source.html" class="el_package">com.mycompany.app</a> &gt; <span class="el_source">PathFinder.java</span></div><h1>PathFinder.java</h1><pre class="source lang-java linenums">package com.mycompany.app;
+
+import java.util.ArrayList;
+/**
+ * PathFinder class for the game. Implements the A* algorithm to find the shortest path from the start node to the goal node.
+ */
+public class PathFinder {
+    Game gamepanel;
+    Node[][] nodes;
+<span class="fc" id="L10">    ArrayList&lt;Node&gt; openList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L11">    public ArrayList&lt;Node&gt; pathList = new ArrayList&lt;&gt;();</span>
+    Node startNode,goalNode,currentNode;
+<span class="fc" id="L13">    boolean pathFound = false;</span>
+<span class="fc" id="L14">    int step = 0;</span>
+    /**
+     * Constructor for the PathFinder class.
+     * @param gamepanel The game panel.
+     */
+<span class="fc" id="L19">    public PathFinder(Game gamepanel){</span>
+<span class="fc" id="L20">        this.gamepanel = gamepanel;</span>
+<span class="fc" id="L21">        createNodes();</span>
+<span class="fc" id="L22">    }</span>
+    /**
+     * Creates the nodes for the game.
+     */
+    // intialize the nodes
+    public void createNodes(){
+<span class="fc" id="L28">        nodes = new Node[gamepanel.boardCol][gamepanel.boardRow];</span>
+<span class="fc" id="L29">        int x = 0;</span>
+        
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        while(x&lt;gamepanel.boardCol){</span>
+<span class="fc" id="L32">            int y = 0;</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">            while(y&lt;gamepanel.boardRow){</span>
+<span class="fc" id="L34">                nodes[x][y] = new Node(x,y);</span>
+<span class="fc" id="L35">                y++;</span>
+            }
+<span class="fc" id="L37">            x++;</span>
+        }
+<span class="fc" id="L39">    }</span>
+    /**
+     * Resets the nodes.
+     */
+    // reset the nodes
+    public void resetNodes(){
+<span class="fc" id="L45">        int x = 0;</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        while(x&lt;gamepanel.boardCol){</span>
+<span class="fc" id="L47">            int y = 0;</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">            while(y&lt;gamepanel.boardRow){</span>
+<span class="fc" id="L49">                nodes[x][y].solid = false;</span>
+<span class="fc" id="L50">                nodes[x][y].open = false;</span>
+<span class="fc" id="L51">                nodes[x][y].closed = false;</span>
+<span class="fc" id="L52">                y++;</span>
+            }
+<span class="fc" id="L54">            x++;</span>
+        }
+        // clear the open list and the path list
+<span class="fc" id="L57">        openList.clear();</span>
+<span class="fc" id="L58">        pathList.clear();</span>
+<span class="fc" id="L59">        pathFound = false;</span>
+<span class="fc" id="L60">        step = 0;</span>
+<span class="fc" id="L61">    }</span>
+    /**
+     * Sets the nodes.
+     * @param startX The starting x coordinate.
+     * @param startY The starting y coordinate.
+     * @param goalX The goal x coordinate.
+     * @param goalY The goal y coordinate.
+     */
+    // set the start node, goal node and the solid nodes
+    public void setNodes(int startX,int startY,int goalX,int goalY){
+<span class="fc" id="L71">        resetNodes();</span>
+
+<span class="fc" id="L73">        startNode = nodes[startX][startY];</span>
+<span class="fc" id="L74">        currentNode = startNode;</span>
+<span class="fc" id="L75">        goalNode = nodes[goalX][goalY];</span>
+<span class="fc" id="L76">        openList.add(startNode);</span>
+
+<span class="fc" id="L78">        int x = 0;</span>
+        
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        while(x&lt;gamepanel.boardCol){</span>
+<span class="fc" id="L81">            int y = 0;</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">            while(y&lt;gamepanel.boardRow){</span>
+<span class="fc" id="L83">                int cellNum = gamepanel.gameBoard.board[x][y];</span>
+<span class="fc bfc" id="L84" title="All 4 branches covered.">                if((gamepanel.gameBoard.cell[cellNum].collision &amp;&amp; gamepanel.gameBoard.cell[cellNum].value ==0) ){</span>
+<span class="fc" id="L85">                    nodes[x][y].solid = true;</span>
+                }
+                // get the cost to move to the node
+<span class="fc" id="L88">                getCost(nodes[x][y]);</span>
+<span class="fc" id="L89">                y++;</span>
+            }
+<span class="fc" id="L91">            x++;</span>
+        }
+
+<span class="fc" id="L94">    }</span>
+    /**
+     * Gets the cost of moving to the node.
+     * @param node The node.
+     */
+    public void getCost(Node node){
+        // G cost
+        // G cost is the cost of moving from the starting node to the current node
+
+<span class="fc" id="L103">        int xDistance = Math.abs(node.col - startNode.col);</span>
+<span class="fc" id="L104">        int yDistance = Math.abs(node.row - startNode.row);</span>
+<span class="fc" id="L105">        node.gCost = xDistance + yDistance;</span>
+
+        // H cost
+        // H cost is the cost of moving from the current node to the goal node
+<span class="fc" id="L109">        xDistance = Math.abs(node.col - goalNode.col);</span>
+<span class="fc" id="L110">        yDistance = Math.abs(node.row - goalNode.row);</span>
+<span class="fc" id="L111">        node.hCost = xDistance + yDistance;</span>
+
+        // F cost
+        // F cost is the sum of the G cost and the H cost
+<span class="fc" id="L115">        node.fCost = node.gCost + node.hCost;</span>
+<span class="fc" id="L116">    }</span>
+    /**
+     * Searches to see if a path is possible, if possible track that path and store it.
+     * @return Whether a path is possible.
+     */
+    // search to see if a path is possible, if possible track that path and store it
+    public boolean search(){
+<span class="pc bpc" id="L123" title="1 of 4 branches missed.">        while (!pathFound &amp;&amp; step &lt; 1000) {</span>
+<span class="fc" id="L124">            int col = currentNode.col;</span>
+<span class="fc" id="L125">            int row = currentNode.row;</span>
+<span class="fc" id="L126">            currentNode.closed = true;</span>
+<span class="fc" id="L127">            openList.remove(currentNode);</span>
+
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">            if(row -1 &gt;= 0){</span>
+<span class="fc" id="L130">                openNode(nodes[col][row-1]);</span>
+            }
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">            if(row +1 &lt; gamepanel.boardRow){</span>
+<span class="fc" id="L133">                openNode(nodes[col][row+1]);</span>
+            }
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">            if(col -1 &gt;= 0){</span>
+<span class="fc" id="L136">                openNode(nodes[col-1][row]);</span>
+            }
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">            if(col +1 &lt; gamepanel.boardCol){</span>
+<span class="fc" id="L139">                openNode(nodes[col+1][row]);</span>
+            }
+
+<span class="fc" id="L142">            int bestFcost = 1000000;</span>
+<span class="fc" id="L143">            int bestIndex = 0;</span>
+
+<span class="fc bfc" id="L145" title="All 2 branches covered.">            for(int i =0; i&lt; openList.size(); i++){</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">                if(openList.get(i).fCost &lt; bestFcost){</span>
+<span class="fc" id="L147">                    bestFcost = openList.get(i).fCost;</span>
+<span class="fc" id="L148">                    bestIndex = i;</span>
+<span class="fc" id="L149">                }</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">                else if (openList.get(i).fCost == bestFcost){</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">                    if(openList.get(i).gCost &lt; openList.get(bestIndex).gCost){</span>
+<span class="fc" id="L152">                        bestIndex = i;</span>
+                    }
+                }
+            }
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">            if(openList.size()== 0){</span>
+<span class="nc" id="L157">                break;</span>
+            }
+<span class="fc" id="L159">            currentNode = openList.get(bestIndex);</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">            if(currentNode == goalNode){</span>
+<span class="fc" id="L161">                pathFound = true;</span>
+<span class="fc" id="L162">                trackPath();</span>
+            }
+<span class="fc" id="L164">            step++;</span>
+            
+        }
+<span class="fc" id="L167">        return pathFound;</span>
+    }
+    /**
+     * Opens the node.
+     * @param node The node.
+     */
+    public void openNode(Node node){
+<span class="fc bfc" id="L174" title="All 6 branches covered.">        if(node.open == false &amp;&amp; node.solid == false &amp;&amp; node.closed == false){</span>
+<span class="fc" id="L175">            node.open = true;</span>
+<span class="fc" id="L176">            node.parent = currentNode;</span>
+<span class="fc" id="L177">            openList.add(node);</span>
+        }
+<span class="fc" id="L179">    }</span>
+    /**
+     * Tracks the path.
+     */
+    // reverse the path list to get the path from the start node to the goal node
+    public void trackPath(){
+<span class="fc" id="L185">        Node tempNode = goalNode;</span>
+
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        while(tempNode != startNode){</span>
+<span class="fc" id="L188">            pathList.add(0,tempNode);</span>
+<span class="fc" id="L189">            tempNode = tempNode.parent;</span>
+        }
+<span class="fc" id="L191">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

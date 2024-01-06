@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CollisionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">koi-kapers</a> &gt; <a href="index.source.html" class="el_package">com.mycompany.app</a> &gt; <span class="el_source">CollisionHandler.java</span></div><h1>CollisionHandler.java</h1><pre class="source lang-java linenums">package com.mycompany.app;
+
+import java.awt.Rectangle;
+
+/**
+ * CollisionHandler class for the game.
+ */
+public class CollisionHandler {
+
+    Game gamepanel;
+    Entity entity;
+<span class="fc" id="L12">    boolean bonusCollect = false;</span>
+
+    /**
+     * Constructor for the CollisionHandler class.
+     * @param gamepanel the game panel
+     */
+<span class="fc" id="L18">    public CollisionHandler(Game gamepanel) {</span>
+<span class="fc" id="L19">        this.gamepanel = gamepanel;</span>
+<span class="fc" id="L20">    }</span>
+
+    /**
+     * Checks if the entity is colliding with a cell that has collision
+     * and if it is, checks if the cell is a reward, penalty, or hide cell.
+     * @param entity the entity to check collision for
+     */
+    public void checkCollison(Entity entity) {
+<span class="fc" id="L28">        this.entity = entity;</span>
+        // get the coordinates of the entity to create 4 points, 2 on x axis and 2 on y axis
+        // we basically create a rectangle that is the hitbox of the entity relative to the entity's current position 
+<span class="fc" id="L31">        int entityLeftX = entity.x + entity.hitbox.x;</span>
+<span class="fc" id="L32">        int entityRightX = entity.x + entity.hitbox.x + entity.hitbox.width;</span>
+<span class="fc" id="L33">        int entityTopY = entity.y + entity.hitbox.y;</span>
+<span class="fc" id="L34">        int entityBottomY = entity.y + entity.hitbox.y+ entity.hitbox.height;</span>
+        // then we use the coordinates to get the cell's coordinates that surround the entity hitbox
+<span class="fc" id="L36">        int entityLeftCol = entityLeftX / gamepanel.cellSize;</span>
+<span class="fc" id="L37">        int entityRightCol = entityRightX / gamepanel.cellSize;</span>
+<span class="fc" id="L38">        int entityTopRow = entityTopY / gamepanel.cellSize;</span>
+<span class="fc" id="L39">        int entityBottomRow = entityBottomY / gamepanel.cellSize;</span>
+        int cellNum1, cellNum2;
+
+<span class="fc bfc" id="L42" title="All 5 branches covered.">        switch (entity.direction) {</span>
+            case &quot;up&quot;:
+                // we get the cell number of the cell we would go to if the entity was to move in the direction it is moving
+                // we do that by moving the entity's hitbox up by the speed of the entity and dividing by the cell size as 
+                // the entity's position is in pixels and the board is in cells
+<span class="fc" id="L47">                entityTopRow = (entityTopY - entity.speed)/gamepanel.cellSize;</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">                if(checkGameWin(entityLeftCol, entityRightCol, entityTopRow, entityBottomRow)) {</span>
+<span class="fc" id="L49">                    return;</span>
+                }
+                // we get the type of cell that the entity would be moving into
+<span class="fc" id="L52">                cellNum1 = gamepanel.gameBoard.board[entityLeftCol][entityTopRow];</span>
+<span class="fc" id="L53">                cellNum2 = gamepanel.gameBoard.board[entityRightCol][entityTopRow];</span>
+                // we check if that type is cell has collision
+<span class="pc bpc" id="L55" title="1 of 4 branches missed.">                if (gamepanel.gameBoard.cell[cellNum1].collision || gamepanel.gameBoard.cell[cellNum2].collision) {</span>
+                    // if it does, we set the entity's colliding variable to true
+<span class="fc" id="L57">                    entity.colliding = true;</span>
+                    // if the entity coliding is a player then check if the cell is a reward, penalty cell or hide cell
+<span class="fc" id="L59">                    checkPlayerInteraction(cellNum1, cellNum2, entityLeftCol, entityTopRow, entityRightCol, entityTopRow);</span>
+                }
+<span class="fc" id="L61">                break;</span>
+
+            case &quot;down&quot;:
+                // we repeat the same process for the other directions
+<span class="fc" id="L65">                entityBottomRow = (entityBottomY + entity.speed)/gamepanel.cellSize;</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">                if(checkGameWin(entityLeftCol, entityRightCol, entityTopRow, entityBottomRow)) {</span>
+<span class="fc" id="L67">                    return;</span>
+                }
+<span class="fc" id="L69">                cellNum1 = gamepanel.gameBoard.board[entityLeftCol][entityBottomRow];</span>
+<span class="fc" id="L70">                cellNum2 = gamepanel.gameBoard.board[entityRightCol][entityBottomRow];</span>
+<span class="pc bpc" id="L71" title="1 of 4 branches missed.">                if (gamepanel.gameBoard.cell[cellNum1].collision || gamepanel.gameBoard.cell[cellNum2].collision) {</span>
+<span class="fc" id="L72">                    entity.colliding = true;</span>
+<span class="fc" id="L73">                    checkPlayerInteraction(cellNum1, cellNum2, entityLeftCol, entityBottomRow, entityRightCol, entityBottomRow);</span>
+                }
+<span class="fc" id="L75">                break;</span>
+
+            case &quot;right&quot;:
+<span class="fc" id="L78">                entityRightCol = (entityRightX + entity.speed)/gamepanel.cellSize;</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">                if(checkGameWin(entityLeftCol, entityRightCol, entityTopRow, entityBottomRow)) {</span>
+<span class="fc" id="L80">                    return;</span>
+                }
+<span class="fc" id="L82">                cellNum1 = gamepanel.gameBoard.board[entityRightCol][entityTopRow];</span>
+<span class="fc" id="L83">                cellNum2 = gamepanel.gameBoard.board[entityRightCol][entityBottomRow];</span>
+<span class="pc bpc" id="L84" title="1 of 4 branches missed.">                if (gamepanel.gameBoard.cell[cellNum1].collision || gamepanel.gameBoard.cell[cellNum2].collision) {</span>
+<span class="fc" id="L85">                    entity.colliding = true;</span>
+<span class="fc" id="L86">                    checkPlayerInteraction(cellNum1, cellNum2, entityRightCol, entityTopRow, entityRightCol, entityBottomRow);</span>
+                }
+<span class="fc" id="L88">                break;</span>
+
+            case &quot;left&quot;:
+<span class="fc" id="L91">                entityLeftCol = (entityLeftX - entity.speed)/gamepanel.cellSize;</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">                if(checkGameWin(entityLeftCol, entityRightCol, entityTopRow, entityBottomRow)) {</span>
+<span class="fc" id="L93">                    return;</span>
+                }
+<span class="fc" id="L95">                cellNum1 = gamepanel.gameBoard.board[entityLeftCol][entityTopRow];</span>
+<span class="fc" id="L96">                cellNum2 = gamepanel.gameBoard.board[entityLeftCol][entityBottomRow];</span>
+<span class="pc bpc" id="L97" title="1 of 4 branches missed.">                if (gamepanel.gameBoard.cell[cellNum1].collision || gamepanel.gameBoard.cell[cellNum2].collision) {</span>
+<span class="fc" id="L98">                    entity.colliding = true;</span>
+
+<span class="fc" id="L100">                    checkPlayerInteraction(cellNum1, cellNum2, entityLeftCol, entityTopRow, entityRightCol, entityBottomRow);</span>
+                }
+                break;
+        }
+<span class="fc" id="L104">    }</span>
+
+    /**
+     * Checks if the cell is a reward, penalty, or hide cell and performs the appropriate action.
+     * @param cellNum the cell number
+     * @param x the x coordinate of the cell
+     * @param y the y coordinate of the cell
+     */
+    public void checkInteraction(int cellNum, int x, int y){
+        // if the cell is a reward cell, collect the reward and remove the object from the board
+<span class="nc bnc" id="L114" title="All 4 branches missed.">       if(cellNum == 3 || cellNum == 5) {</span>
+<span class="nc" id="L115">            gamepanel.p1.collectReward(gamepanel.gameBoard.cell[cellNum]);</span>
+<span class="nc" id="L116">            gamepanel.gameBoard.removeObject(x, y);</span>
+<span class="nc" id="L117">       }</span>
+         // if the cell is a penalty cell, collect the penalty and remove the object from the board
+<span class="nc bnc" id="L119" title="All 2 branches missed.">       else if(cellNum == 4) {</span>
+<span class="nc" id="L120">            gamepanel.p1.collectPenalty(gamepanel.gameBoard.cell[cellNum]);</span>
+<span class="nc" id="L121">            gamepanel.gameBoard.removeObject(x, y);</span>
+<span class="nc" id="L122">       }</span>
+       // if the cell is a hide cell, hide the player
+<span class="nc bnc" id="L124" title="All 2 branches missed.">       else if (cellNum == 6) {</span>
+<span class="nc" id="L125">            gamepanel.p1.hide(x,y);</span>
+       }
+<span class="nc" id="L127">    }</span>
+
+    /**
+     * Checks if the entity is colliding with another entity.
+     * @param e1 the first entity
+     * @param e2 the second entity
+     * @return true if the entities are colliding, false otherwise
+     */
+    public boolean checkGameOver(Entity e1, Entity e2){
+        // create entity hitboxes and check if they intersect
+<span class="fc" id="L137">        Rectangle e1Hitbox = new Rectangle(e1.hitbox.x + e1.x, e1.hitbox.y + e1.y, e1.hitbox.width, e1.hitbox.height);</span>
+<span class="fc" id="L138">        Rectangle e2Hitbox = new Rectangle(e2.hitbox.x + e2.x, e2.hitbox.y + e2.y, e2.hitbox.width, e2.hitbox.height);</span>
+<span class="fc" id="L139">        return e1Hitbox.intersects(e2Hitbox);</span>
+    }
+
+    /**
+     * Checks if the player is colliding with the end cell.
+     * @param left the left cell number
+     * @param right the right cell number
+     * @param top the top cell number
+     * @param bottom the bottom cell number
+     * @return true if the player is colliding with the end cell, false otherwise
+     */
+    public boolean checkGameWin(int left, int right, int top, int bottom) {
+        // if the next cell is the last cell/end cell, the game is won
+<span class="pc bpc" id="L152" title="3 of 8 branches missed.">        if (right == gamepanel.boardCol || bottom == gamepanel.boardRow || right == 0 || bottom == 0) {</span>
+<span class="fc" id="L153">            gamepanel.keyHandle.gameState = 5;</span>
+<span class="fc" id="L154">            return true;</span>
+        }
+<span class="fc" id="L156">        return false;</span>
+    }
+
+    public void checkPlayerInteraction(int cellNum1,int cellNum2,int c1x,int c1y,int c2x,int c2y){
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">        if (entity.player == true) {</span>
+<span class="pc bpc" id="L161" title="4 of 8 branches missed.">            if(cellNum1 == 3 || cellNum1 == 4 || cellNum1 == 5 || cellNum1 == 6) {</span>
+<span class="nc" id="L162">                checkInteraction(cellNum1, c1x, c1y);</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">                if(cellNum1 != 6){</span>
+<span class="nc" id="L164">                    entity.colliding = false;</span>
+                }
+<span class="pc bpc" id="L166" title="4 of 8 branches missed.">                } else if (cellNum2 == 3 || cellNum2 == 4 || cellNum2 == 5 || cellNum2 == 6) {</span>
+<span class="nc" id="L167">                    checkInteraction(cellNum2, c2x, c2y);</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">                    if(cellNum2 != 6){</span>
+<span class="nc" id="L169">                        entity.colliding = false;</span>
+                    }
+                }
+<span class="pc bpc" id="L172" title="9 of 12 branches missed.">                if((cellNum1 == 6 &amp;&amp; cellNum2 == 6)|| (cellNum1 == 6 &amp;&amp; cellNum2 == 0) || (cellNum1 == 0 &amp;&amp; cellNum2 == 6)){</span>
+<span class="nc" id="L173">                    entity.colliding = false;</span>
+                }
+<span class="nc" id="L175">            } else {</span>
+                // if the entity is not a player, check if the cell is a reward, penalty cell and let the entity move through it
+<span class="nc bnc" id="L177" title="All 12 branches missed.">                if ((cellNum1 == 3 || cellNum1 == 4 || cellNum1 == 5 || cellNum2 == 3 || cellNum2 == 4 || cellNum1 == 5) </span>
+<span class="nc bnc" id="L178" title="All 8 branches missed.">                    &amp;&amp; (cellNum1 != 1 &amp;&amp; cellNum2 != 1 &amp;&amp; cellNum1 != 2 &amp;&amp; cellNum2 != 2))  {</span>
+<span class="nc" id="L179">                    entity.colliding = false;</span>
+                }
+            }
+<span class="fc" id="L182">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

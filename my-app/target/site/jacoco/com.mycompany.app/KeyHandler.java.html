@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KeyHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">koi-kapers</a> &gt; <a href="index.source.html" class="el_package">com.mycompany.app</a> &gt; <span class="el_source">KeyHandler.java</span></div><h1>KeyHandler.java</h1><pre class="source lang-java linenums">package com.mycompany.app;
+
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
+public class KeyHandler implements KeyListener {
+    public boolean up, down, left, right;
+    public int gameState;
+    private Board board;
+    private Game panel;
+
+    /**
+     * Constructor for the KeyHandler
+     * @param board
+     * @param panel
+     */
+<span class="fc" id="L17">    public KeyHandler(Board board, Game panel) {</span>
+<span class="fc" id="L18">        this.board = board;</span>
+<span class="fc" id="L19">        this.panel = panel;</span>
+<span class="fc" id="L20">    }</span>
+
+    /**
+     * Processes the key pressed
+     * @param e the event to be processed
+     */
+    @Override
+    public void keyPressed(KeyEvent e) {
+<span class="fc" id="L28">        int program = e.getKeyCode();</span>
+
+<span class="pc bpc" id="L30" title="5 of 8 branches missed.">        switch (gameState) {</span>
+            case 0: // Playing
+<span class="pc bpc" id="L32" title="1 of 6 branches missed.">                switch (e.getKeyCode()) {</span>
+                    case KeyEvent.VK_ESCAPE:
+<span class="fc" id="L34">                        gameState = 1;</span>
+<span class="fc" id="L35">                        break;</span>
+                    case KeyEvent.VK_W:
+<span class="fc" id="L37">                        up = true;</span>
+<span class="fc" id="L38">                        break;</span>
+                    case KeyEvent.VK_S:
+<span class="fc" id="L40">                        down = true;</span>
+<span class="fc" id="L41">                        break;</span>
+                    case KeyEvent.VK_D:
+<span class="fc" id="L43">                        right = true;</span>
+<span class="fc" id="L44">                        break;</span>
+                    case KeyEvent.VK_A:
+<span class="fc" id="L46">                        left = true;</span>
+                        break;
+                }
+<span class="fc" id="L49">                break;</span>
+
+            case 1: // Paused
+<span class="pc bpc" id="L52" title="1 of 3 branches missed.">                switch (e.getKeyCode()) {</span>
+                    case KeyEvent.VK_R:  //For now the R key is the &quot;Resuming key&quot;
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">                        if (gameState == 1) {</span>
+<span class="fc" id="L55">                            gameState = 0;</span>
+                        }
+<span class="fc" id="L57">                        break;</span>
+                    case KeyEvent.VK_Q:
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">                        if (gameState == 1) {</span>
+<span class="fc" id="L60">                            board.loadMap(&quot;/title.txt&quot;);</span>
+<span class="fc" id="L61">                            gameState = 2;</span>
+                        }
+                        break;
+                }
+<span class="fc" id="L65">                break;</span>
+
+            case 2: // Title Screen
+<span class="pc bpc" id="L68" title="2 of 4 branches missed.">                switch (program) {</span>
+                    case KeyEvent.VK_ENTER:
+<span class="fc bfc" id="L70" title="All 2 branches covered.">                        if(PopUp.titleOption == 0) {</span>
+<span class="fc" id="L71">                            this.panel.nextLevel();</span>
+<span class="fc" id="L72">                            gameState = 0;</span>
+                        }
+<span class="fc bfc" id="L74" title="All 2 branches covered.">                        if(PopUp.titleOption == 1) {</span>
+<span class="fc" id="L75">                            gameState = 4;</span>
+                        }
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">                        if(PopUp.titleOption == 2) {</span>
+<span class="nc" id="L78">                            System.exit(0);</span>
+                        }
+<span class="nc" id="L80">                        break;</span>
+                    case KeyEvent.VK_W:
+<span class="nc" id="L82">                        PopUp.titleOption--;</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">                        if (PopUp.titleOption &lt; 0) {</span>
+<span class="nc" id="L84">                            PopUp.titleOption = 2;</span>
+                        }
+<span class="nc" id="L86">                        break;</span>
+                    case KeyEvent.VK_S:
+<span class="fc" id="L88">                        PopUp.titleOption++;</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">                        if (PopUp.titleOption &gt; 2) {</span>
+<span class="nc" id="L90">                            PopUp.titleOption = 0;</span>
+                        }
+                        break;
+                }
+<span class="nc" id="L94">                break;</span>
+
+            case 3: // Game Over
+<span class="nc bnc" id="L97" title="All 4 branches missed.">                switch (e.getKeyCode()) {</span>
+                    case KeyEvent.VK_ENTER:
+<span class="nc bnc" id="L99" title="All 2 branches missed.">                        if(PopUp.titleOption == 0) {</span>
+<span class="nc" id="L100">                            panel.restart();</span>
+                        }
+<span class="nc bnc" id="L102" title="All 2 branches missed.">                        if(PopUp.titleOption == 1) {</span>
+<span class="nc" id="L103">                            System.exit(0);</span>
+                        }
+<span class="nc" id="L105">                        break;</span>
+                    case KeyEvent.VK_W:
+<span class="nc" id="L107">                        PopUp.titleOption--;</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">                        if (PopUp.titleOption &lt; 0) {</span>
+<span class="nc" id="L109">                            PopUp.titleOption = 1;</span>
+                        }
+<span class="nc" id="L111">                        break;</span>
+                    case KeyEvent.VK_S:
+<span class="nc" id="L113">                        PopUp.titleOption++;</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                        if (PopUp.titleOption &gt; 1) {</span>
+<span class="nc" id="L115">                            PopUp.titleOption = 0;</span>
+                        }
+                        break;
+                }
+<span class="nc" id="L119">                break;</span>
+                    
+            case 4: // Rules
+<span class="nc" id="L122">                board.loadMap(&quot;/rules.txt&quot;);</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">                switch (e.getKeyCode()) {</span>
+                    case KeyEvent.VK_ESCAPE:
+<span class="nc" id="L125">                        board.loadMap(&quot;/title.txt&quot;);</span>
+<span class="nc" id="L126">                        gameState = 2;</span>
+                        break;
+                }
+<span class="nc" id="L129">                break;</span>
+
+            case 5:
+<span class="nc bnc" id="L132" title="All 4 branches missed.">                switch (e.getKeyCode()) {</span>
+                    case KeyEvent.VK_ENTER:
+<span class="nc bnc" id="L134" title="All 2 branches missed.">                        if(PopUp.titleOption == 0) {</span>
+<span class="nc" id="L135">                            panel.nextLevel();</span>
+                        }
+<span class="nc bnc" id="L137" title="All 2 branches missed.">                        if(PopUp.titleOption == 1) {</span>
+<span class="nc" id="L138">                            panel.restart();</span>
+                        }
+<span class="nc bnc" id="L140" title="All 2 branches missed.">                        if(PopUp.titleOption == 2) {</span>
+<span class="nc" id="L141">                            System.exit(0);</span>
+                        }
+<span class="nc" id="L143">                        break;</span>
+                    case KeyEvent.VK_W:
+<span class="nc" id="L145">                        PopUp.titleOption--;</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">                        if (PopUp.titleOption &lt; 0) {</span>
+<span class="nc" id="L147">                            PopUp.titleOption = 2;</span>
+                        }
+<span class="nc" id="L149">                        break;</span>
+                    case KeyEvent.VK_S:
+<span class="nc" id="L151">                        PopUp.titleOption++;</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">                        if (PopUp.titleOption &gt; 2) {</span>
+<span class="nc" id="L153">                            PopUp.titleOption = 0;</span>
+                        }
+                        break;
+                    }
+<span class="nc" id="L157">                break;</span>
+
+            case 6:
+<span class="nc bnc" id="L160" title="All 4 branches missed.">                switch (e.getKeyCode()) {</span>
+                    case KeyEvent.VK_ENTER:
+<span class="nc bnc" id="L162" title="All 2 branches missed.">                        if(PopUp.titleOption == 0) {</span>
+<span class="nc" id="L163">                            panel.restart();</span>
+                        }
+<span class="nc bnc" id="L165" title="All 2 branches missed.">                        if(PopUp.titleOption == 1) {</span>
+<span class="nc" id="L166">                            System.exit(0);</span>
+                        }
+<span class="nc" id="L168">                        break;</span>
+                    case KeyEvent.VK_W:
+<span class="nc" id="L170">                        PopUp.titleOption--;</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">                        if (PopUp.titleOption &lt; 0) {</span>
+<span class="nc" id="L172">                            PopUp.titleOption = 1;</span>
+                        }
+<span class="nc" id="L174">                        break;</span>
+                    case KeyEvent.VK_S:
+<span class="nc" id="L176">                        PopUp.titleOption++;</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">                        if (PopUp.titleOption &gt; 1) {</span>
+<span class="nc" id="L178">                            PopUp.titleOption = 0;</span>
+                        }
+                        break;
+                }
+                break;
+        }
+<span class="fc" id="L184">    }</span>
+
+    /**
+     * Processes the key released
+     * @param e the event to be processed
+     */
+    @Override
+    public void keyReleased(KeyEvent e) {
+<span class="pc bpc" id="L192" title="1 of 5 branches missed.">        switch (e.getKeyCode()) {</span>
+            case KeyEvent.VK_W:
+<span class="fc" id="L194">                up = false;</span>
+<span class="fc" id="L195">                break;</span>
+            case KeyEvent.VK_S:
+<span class="fc" id="L197">                down = false;</span>
+<span class="fc" id="L198">                break;</span>
+            case KeyEvent.VK_D:
+<span class="fc" id="L200">                right = false;</span>
+<span class="fc" id="L201">                break;</span>
+            case KeyEvent.VK_A:
+<span class="fc" id="L203">                left = false;</span>
+                break;
+        }
+<span class="fc" id="L206">    }</span>
+
+    /**
+     * Unused method from KeyListener interface
+     * @param e the event to be processed
+     */
+    @Override
+    public void keyTyped(KeyEvent e) {
+<span class="nc" id="L214">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

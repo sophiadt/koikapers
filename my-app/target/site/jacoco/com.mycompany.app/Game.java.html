@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Game.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">koi-kapers</a> &gt; <a href="index.source.html" class="el_package">com.mycompany.app</a> &gt; <span class="el_source">Game.java</span></div><h1>Game.java</h1><pre class="source lang-java linenums">package com.mycompany.app;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
+
+/**
+ * Game class that handles methods that involve activating the game and states.
+ * @code intialCellSize - sets each cell to 16x16 pixels
+ * @code scale - scales each cell 4 times
+ * @code cellSize - sets each cell to 64x64 pixels
+ * @code hitboxSize - sets the hit box to 48x48 pixels
+ * @code boardCol - sets the board to 30 cells wide which is 30*64 = 1920 pixels
+ * @code boardRow - sets the board to 16 cells high which is 16*64 = 1024 pixels
+ * @code windowWidth - sets the window width to 1920 pixels
+ * @code windowHeight - sets the window height to 1024 pixels
+ * @code p1 - creates a new player
+ * @code raccoon - creates a new raccoon
+ * @code collisionHandler - creates a new collision handler
+ * @code pathFinder - creates a new path finder
+ * @code thread - creates a new thread
+ * @code fps - sets the fps to 60
+ * @code level - sets the level to the title screen
+ * @code gameBoard - creates a new board
+ * @code keyHandle - creates a new key handler
+ * @code UI - creates a new pop up
+ * @code levelN - sets the level number to 0
+ */
+public class Game extends JPanel implements Runnable {
+
+<span class="fc" id="L35">    final int intialCellSize = 16;</span>
+<span class="fc" id="L36">    final int scale = 4;</span>
+<span class="fc" id="L37">    public final int cellSize = intialCellSize * scale; </span>
+<span class="fc" id="L38">    public final int hitboxSize = intialCellSize * 3;</span>
+<span class="fc" id="L39">    public final int boardCol = 30;</span>
+<span class="fc" id="L40">    public final int boardRow = 16;</span>
+<span class="fc" id="L41">    public final int windowWidth = boardCol * cellSize;</span>
+<span class="fc" id="L42">    public final int windowHeight = boardRow * cellSize;</span>
+    public final Player p1;
+    public final Raccoon raccoon;
+<span class="fc" id="L45">    public CollisionHandler collisionHandler = new CollisionHandler(this);</span>
+<span class="fc" id="L46">    public PathFinder pathFinder = new PathFinder(this);</span>
+    
+    Thread thread;
+<span class="fc" id="L49">    final int fps = 60;</span>
+<span class="fc" id="L50">    public String level = &quot;/title.txt&quot;;</span>
+<span class="fc" id="L51">    public Board gameBoard = new Board(this, level);</span>
+<span class="fc" id="L52">    KeyHandler keyHandle = new KeyHandler(gameBoard, this);</span>
+<span class="fc" id="L53">    public PopUp UI = new PopUp(this);</span>
+<span class="fc" id="L54">    public int levelN = 1;</span>
+
+    /**
+     *  Constructor for the game.
+     */
+<span class="fc" id="L59">    public Game() {</span>
+<span class="fc" id="L60">        this.setPreferredSize(new Dimension(this.windowWidth, this.windowHeight));</span>
+<span class="fc" id="L61">        this.setBackground(Color.BLACK);</span>
+<span class="fc" id="L62">        this.setDoubleBuffered(true);</span>
+<span class="fc" id="L63">        this.addKeyListener(this.keyHandle);</span>
+<span class="fc" id="L64">        this.setFocusable(true);</span>
+<span class="fc" id="L65">        this.p1 = new Player(this, this.keyHandle);</span>
+<span class="fc" id="L66">        this.raccoon = new Raccoon(this, this.keyHandle);</span>
+<span class="fc" id="L67">        keyHandle.gameState = 2;</span>
+<span class="fc" id="L68">    }</span>
+
+    /**
+     * Starts the game.
+     * Bind to button, if button is pressed, start game.
+     * For now hard coded on start.
+     */
+    public void startGame() {
+<span class="fc" id="L76">        thread = new Thread(this); // start the thread</span>
+<span class="fc" id="L77">        thread.start();</span>
+        // six game states, 0 = playing, 1 = paused, 2 = Title screen, 3 = Game Over, 4 = Rules, 5 = Game Won, 6 = Game Finished
+<span class="fc" id="L79">    }</span>
+
+    /**
+     * Stops the game.
+     */
+    @Override
+    public void run() {
+        // delta/acumulator used for FPS
+<span class="fc" id="L87">        double interval = 1000000000 / fps;</span>
+<span class="fc" id="L88">        double delta = 0;</span>
+        long currentTime;
+<span class="fc" id="L90">        long lastTime = System.nanoTime();</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        while (thread != null) {</span>
+<span class="fc" id="L92">            currentTime = System.nanoTime();</span>
+<span class="fc" id="L93">            delta += (currentTime - lastTime) / interval;</span>
+<span class="fc" id="L94">            lastTime = currentTime;</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">            if (delta &gt;= 1) {</span>
+<span class="fc" id="L96">                update();</span>
+<span class="fc" id="L97">                repaint();</span>
+<span class="fc" id="L98">                delta--;</span>
+            }
+        }
+<span class="nc" id="L101">    }</span>
+
+    /**
+     * Updates the game every frame (60 seconds).
+     * gameState == 0 - playing screen
+     * gameState = 3 - game over screen
+     * If the player collides with the raccoon, it changes the game state to game over.
+     */
+    public void update() {
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        if (keyHandle.gameState == 0) {</span>
+<span class="fc" id="L111">            p1.update();</span>
+<span class="fc" id="L112">            this.raccoon.update(p1.x, p1.y);</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">            if(collisionHandler.checkGameOver(p1, this.raccoon)){</span>
+<span class="nc" id="L114">                keyHandle.gameState = 3;</span>
+            }
+        }
+<span class="fc" id="L117">    }</span>
+
+    /**
+     * Paints the game every frame (60 seconds) for each game state.
+     * @param g the &lt;code&gt;Graphics&lt;/code&gt; object to protect
+     */
+    public void paintComponent(Graphics g) {
+<span class="fc" id="L124">        super.paintComponent(g);</span>
+<span class="fc" id="L125">        Graphics2D g2d = (Graphics2D) g;</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        if (keyHandle.gameState == 2) {</span>
+<span class="fc" id="L127">            Color titleColour = new Color(61,119,161);</span>
+<span class="fc" id="L128">            g2d.setColor(titleColour);</span>
+<span class="fc" id="L129">            gameBoard.draw(g2d);</span>
+
+            //Options for Starting Game, Viewing Rules, and Quiting Game
+<span class="fc" id="L132">            UI.displaySubtitleMessage(g2d, &quot;Start Game&quot;, cellSize * ((boardCol / 2))-100,cellSize * ((boardRow / 2)) - 30, Color.BLACK, 0);</span>
+<span class="fc" id="L133">            UI.displaySubtitleMessage(g2d, &quot;Rules&quot;, cellSize * ((boardCol / 2))-100,cellSize * ((boardRow / 2)) + 15, Color.BLACK, 1);</span>
+<span class="fc" id="L134">            UI.displaySubtitleMessage(g2d, &quot;Quit&quot;, cellSize * ((boardCol / 2))-100,cellSize * ((boardRow / 2)) + 60, Color.BLACK, 2);</span>
+<span class="fc" id="L135">            UI.displaySubtitleMessage(g2d, &quot;Switch Options&quot;, cellSize * ((boardCol/2) - 4) - 64*2 + 10,cellSize * 16 - 15, Color.BLACK, 2);</span>
+<span class="fc" id="L136">            UI.displaySubtitleMessage(g2d, &quot;Select&quot;, cellSize * ((boardCol/2) - 4) + 64*6 + 10,cellSize * 16 - 15, Color.BLACK, 2);</span>
+
+            //Add photo displaying controls
+            try {
+<span class="fc" id="L140">                UI.displayKeyCaps(g2d,cellSize * ((boardCol/2) - 4) - 64*4,cellSize * 14, ImageIO.read(getClass().getResourceAsStream(&quot;/ui/w.png&quot;)));</span>
+<span class="fc" id="L141">                UI.displayKeyCaps(g2d,cellSize * ((boardCol/2) - 4) - 64*5,cellSize * 15, ImageIO.read(getClass().getResourceAsStream(&quot;/ui/a.png&quot;)));</span>
+<span class="fc" id="L142">                UI.displayKeyCaps(g2d,cellSize * ((boardCol/2) - 4) - 64*4,cellSize * 15, ImageIO.read(getClass().getResourceAsStream(&quot;/ui/s.png&quot;)));</span>
+<span class="fc" id="L143">                UI.displayKeyCaps(g2d,cellSize * ((boardCol/2) - 4) - 64*3,cellSize * 15, ImageIO.read(getClass().getResourceAsStream(&quot;/ui/d.png&quot;)));</span>
+<span class="fc" id="L144">                UI.displayKeyCaps(g2d,cellSize * ((boardCol/2) - 4) + 64*5,cellSize * 15, ImageIO.read(getClass().getResourceAsStream(&quot;/ui/enter.png&quot;)));</span>
+<span class="pc" id="L145">            } catch (IOException e) {</span>
+<span class="nc" id="L146">                e.printStackTrace();</span>
+            }        
+            //Added background for Rules page
+<span class="pc bfc" id="L149" title="All 2 branches covered.">        } else if (keyHandle.gameState == 4) {</span>
+<span class="fc" id="L150">            gameBoard.draw(g2d);</span>
+
+<span class="fc" id="L152">            UI.displayTitleMessage(g2d, &quot;Rules&quot;, cellSize * ((boardCol / 2))-50, cellSize * ((boardRow / 2)) - 375, Color.BLACK);</span>
+<span class="fc" id="L153">            UI.displaySubtitleMessage(g2d, &quot;Reach the end of the maze while avoiding racoons!&quot;, cellSize * ((boardCol / 2))-550, cellSize * ((boardRow / 2)) - 310, Color.BLACK);</span>
+<span class="fc" id="L154">            UI.displaySubtitleMessage(g2d, &quot;The game is over if the user reaches a negative score&quot;, cellSize * ((boardCol / 2))-550, cellSize * ((boardRow / 2)) - 260, Color.BLACK);</span>
+<span class="fc" id="L155">            UI.displaySubtitleMessage(g2d, &quot;Hide under lily pads to prevent the racoon from following&quot;, cellSize * ((boardCol / 2))-550, cellSize * ((boardRow / 2)) - 210, Color.BLACK);</span>
+<span class="fc" id="L156">            UI.displaySubtitleMessage(g2d, &quot;The bonus black fish will disappear after a set duration of time&quot;, cellSize * ((boardCol / 2))-550, cellSize * ((boardRow / 2)) - 160, Color.BLACK);</span>
+
+            try {
+<span class="fc" id="L159">                UI.displaySubtitleRules(g2d, &quot;Lily Pad: Used for hiding&quot;, cellSize * ((boardCol / 2))-200, cellSize * ((boardRow / 2)), Color.BLACK, ImageIO.read(getClass().getResourceAsStream(&quot;/obstacles/lilypad.png&quot;)));</span>
+<span class="fc" id="L160">                UI.displaySubtitleRules(g2d, &quot;Reward: +1 Point&quot;, cellSize * ((boardCol / 2))-200, cellSize * ((boardRow / 2))-75, Color.BLACK, ImageIO.read(getClass().getResourceAsStream(&quot;/orangekoi/up.png&quot;)));</span>
+<span class="fc" id="L161">                UI.displaySubtitleRules(g2d, &quot;Moving Enemy: Game Over&quot;, cellSize * ((boardCol / 2))-200, cellSize * ((boardRow / 2))+75, Color.BLACK, ImageIO.read(getClass().getResourceAsStream(&quot;/enemies/up/1.png&quot;)));</span>
+<span class="fc" id="L162">                UI.displaySubtitleRules(g2d, &quot;Stationary Enemy: -1 Point&quot;, cellSize * ((boardCol / 2))-200, cellSize * ((boardRow / 2))+150, Color.BLACK, ImageIO.read(getClass().getResourceAsStream(&quot;/obstacles/caution.png&quot;)));</span>
+<span class="fc" id="L163">                UI.displaySubtitleRules(g2d, &quot;Obstacle: Chair&quot;, cellSize * ((boardCol / 2))-200, cellSize * ((boardRow / 2))+225, Color.BLACK, ImageIO.read(getClass().getResourceAsStream(&quot;/obstacles/chair.png&quot;)));</span>
+<span class="fc" id="L164">                UI.displaySubtitleRules(g2d, &quot;Bonus: +10 Points&quot;, cellSize * ((boardCol / 2))-200, cellSize * ((boardRow / 2))+300, Color.BLACK, ImageIO.read(getClass().getResourceAsStream(&quot;/blackkoi/up.png&quot;)));</span>
+
+<span class="fc" id="L166">                UI.displaySubtitleMessage(g2d, &quot;Press esc to return to title page&quot;, cellSize * ((boardCol / 2))-300, cellSize * ((boardRow / 2))+400, Color.BLACK);</span>
+<span class="pc" id="L167">            } catch (IOException e) {</span>
+<span class="nc" id="L168">                e.printStackTrace();</span>
+            }
+<span class="nc" id="L170">        } else {</span>
+<span class="fc" id="L171">            this.gameBoard.draw(g2d);</span>
+<span class="fc" id="L172">            this.p1.draw(g2d);</span>
+<span class="fc" id="L173">            this.raccoon.draw(g2d);</span>
+            // draw UI for game over
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">            if(keyHandle.gameState == 3) {</span>
+<span class="nc" id="L176">                gameBoard.loadMap(&quot;/gameover.txt&quot;);</span>
+<span class="nc" id="L177">                gameBoard.draw(g2d);</span>
+<span class="nc" id="L178">                UI.displaySubtitleMessage(g2d, &quot;Title Screen&quot;, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) - 150, Color.BLACK, 0);</span>
+<span class="nc" id="L179">                UI.displaySubtitleMessage(g2d, &quot;Exit&quot;, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) - 110, Color.BLACK, 1);</span>
+<span class="nc" id="L180">                UI.displaySystemText(g2d, &quot;Points: &quot; + p1.points, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) +100, Color.BLACK);</span>
+<span class="nc" id="L181">                UI.displaySystemText(g2d, &quot;Time: &quot; + Math.round(p1.timeElapsed * 10.0)/10.0, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) +160, Color.BLACK);</span>
+    
+<span class="nc" id="L183">            }</span>
+            // draw UI for game won
+<span class="pc bpc" id="L185" title="1 of 2 branches missed.">            else if(keyHandle.gameState == 5) {</span>
+<span class="nc" id="L186">                gameBoard.loadMap(&quot;/gamewon.txt&quot;);</span>
+<span class="nc" id="L187">                gameBoard.draw(g2d);</span>
+<span class="nc" id="L188">                UI.displaySubtitleMessage(g2d, &quot;Next Level&quot;, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) - 190, Color.BLACK, 0);</span>
+<span class="nc" id="L189">                UI.displaySubtitleMessage(g2d, &quot;Title Screen&quot;, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) - 150, Color.BLACK, 1);</span>
+<span class="nc" id="L190">                UI.displaySubtitleMessage(g2d, &quot;Exit&quot;, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) - 110, Color.BLACK, 2);</span>
+<span class="nc" id="L191">                UI.displaySystemText(g2d, &quot;Points: &quot; + p1.points, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) +100, Color.BLACK);</span>
+<span class="nc" id="L192">                UI.displaySystemText(g2d, &quot;Time: &quot; + Math.round(p1.timeElapsed * 10.0)/10.0, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) +160, Color.BLACK);</span>
+    
+<span class="nc" id="L194">            }</span>
+            // draw UI for game won
+<span class="pc bpc" id="L196" title="1 of 2 branches missed.">            else if(keyHandle.gameState == 6) {</span>
+<span class="nc" id="L197">                gameBoard.loadMap(&quot;/gamewon.txt&quot;);</span>
+<span class="nc" id="L198">                gameBoard.draw(g2d);</span>
+<span class="nc" id="L199">                UI.displaySubtitleMessage(g2d, &quot;Thanks for playing&quot;, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) - 190, Color.BLACK);</span>
+<span class="nc" id="L200">                UI.displaySubtitleMessage(g2d, &quot;Title Screen&quot;, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) - 150, Color.BLACK, 0);</span>
+<span class="nc" id="L201">                UI.displaySubtitleMessage(g2d, &quot;Exit&quot;, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) - 110, Color.BLACK, 1);</span>
+<span class="nc" id="L202">                UI.displaySystemText(g2d, &quot;Points: &quot; + p1.points, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) +100, Color.BLACK);</span>
+<span class="nc" id="L203">                UI.displaySystemText(g2d, &quot;Time: &quot; + Math.round(p1.timeElapsed * 10.0)/10.0, cellSize * ((boardCol / 2))+520,cellSize * ((boardRow / 2)) +160, Color.BLACK);</span>
+    
+            }
+            // draw UI for paused
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">            if(keyHandle.gameState == 1){</span>
+                // needs better way to center text
+<span class="nc" id="L209">                Color color = new Color(0,0,0,0.5f);</span>
+<span class="nc" id="L210">                g2d.setColor(color);</span>
+<span class="nc" id="L211">                g2d.fillRect(0, 0, windowWidth, windowHeight);</span>
+<span class="nc" id="L212">                UI.displaySystemText(g2d, &quot;|| Paused&quot;, cellSize * ((boardCol/2) - 4),cellSize * ((boardRow / 2) - 2), Color.BLACK);</span>
+<span class="nc" id="L213">                UI.displaySystemText(g2d, &quot;Resume&quot;, cellSize * ((boardCol/2) - 4) + 80,cellSize * ((boardRow / 2)) - 15, Color.BLACK);</span>
+<span class="nc" id="L214">                UI.displaySystemText(g2d, &quot;Back to Main menu&quot;, cellSize * ((boardCol/2) - 4) + 80,cellSize * ((boardRow / 2)) +50  , Color.BLACK);</span>
+
+                //Add photo displaying key caps
+                try {
+<span class="nc" id="L218">                    UI.displayKeyCaps(g2d,cellSize * ((boardCol/2) - 4),cellSize * 7, ImageIO.read(getClass().getResourceAsStream(&quot;/ui/r.png&quot;)));</span>
+<span class="nc" id="L219">                    UI.displayKeyCaps(g2d,cellSize * ((boardCol/2) - 4),cellSize * 8, ImageIO.read(getClass().getResourceAsStream(&quot;/ui/q.png&quot;)));</span>
+<span class="nc" id="L220">                } catch (IOException e) {</span>
+<span class="nc" id="L221">                    e.printStackTrace();</span>
+                }
+            }
+        }
+<span class="fc" id="L225">        g2d.dispose();</span>
+<span class="fc" id="L226">    }</span>
+
+    /**
+     * Restarts the game.
+     */
+    public void restart() {
+<span class="nc" id="L232">        this.p1.points = 0;</span>
+<span class="nc" id="L233">        this.p1.resetTime();</span>
+<span class="nc" id="L234">        this.level = &quot;/title.txt&quot;;</span>
+<span class="nc" id="L235">        this.gameBoard.loadMap(level);</span>
+<span class="nc" id="L236">        this.levelN = 1;</span>
+<span class="nc" id="L237">        keyHandle.gameState = 2;</span>
+<span class="nc" id="L238">    }</span>
+
+    /**
+     * Starts the next level.
+     */
+    public void nextLevel(){
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">        if(keyHandle.gameState == 5){</span>
+<span class="nc" id="L245">            this.levelN++;</span>
+        }
+<span class="fc bfc" id="L247" title="All 2 branches covered.">        if(levelN == 4){</span>
+<span class="fc" id="L248">            keyHandle.gameState = 6;</span>
+<span class="fc" id="L249">            return;</span>
+        }
+<span class="fc" id="L251">        this.level = &quot;/map&quot; + levelN + &quot;.txt&quot;;</span>
+<span class="fc" id="L252">        this.gameBoard.loadMap(level);</span>
+<span class="fc" id="L253">        this.p1.resetTime();</span>
+<span class="fc" id="L254">        this.p1.points = 0;</span>
+<span class="fc" id="L255">        keyHandle.gameState = 0;</span>
+<span class="fc" id="L256">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
