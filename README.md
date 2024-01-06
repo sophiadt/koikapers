@@ -4,7 +4,7 @@ Koi Kapers is a 2D Java-implemented game that was inspired by the school's koi p
 ## Game Demo
 [Link to game demo](https://youtu.be/cZQ1i3oe57I)
 
-![](https://github.com/sophiadt/koikapers/blob/main/Documents/phase4-video%20(1).gif)
+![](https://github.com/sophiadt/koikapers/blob/main/media/phase4-video.gif)
 
 ## How to Run the Game
   To run the game, you will need to have Maven, JAR, and Oracle JDK 21 or higher installed.
